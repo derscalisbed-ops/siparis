@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Supply Line</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12141a;
+    --bg-elev:#1a1d24;
+    --bg-elev-2:#21252d;
+    --bg-elev-3:#2a2f38;
+    --border:#2e333c;
+    --border-soft:#242830;
+    --text:#f1f2f4;
+    --text-soft:#8d93a0;
+    --text-faint:#5c626e;
+    --amber:#ff9142;
+    --amber-dim:#e0782f;
+    --amber-glow:rgba(255,145,66,0.18);
+    --wa:#3ddc84;
+    --wa-dim:#2bb96c;
+    --mail:#5b9dff;
+    --mail-dim:#3f7fe0;
+    --danger:#ff6b6b;
+    --radius:14px;
+    --radius-sm:9px;
+    --shadow-card:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    --shadow-modal:0 -8px 40px rgba(0,0,0,0.5);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(255,145,66,0.06), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',-apple-system,sans-serif;
+    min-height:100vh;
+    padding-bottom:96px;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--amber-glow);}
+
+  header{
+    padding:22px 20px 16px;
+    position:sticky;top:0;background:rgba(18,20,26,0.92);backdrop-filter:blur(10px);
+    z-index:10;
+    border-bottom:1px solid var(--border-soft);
+  }
+  .brand-row{display:flex;align-items:center;gap:10px;}
+  .brand-mark{
+    width:30px;height:30px;border-radius:8px;
+    background:linear-gradient(150deg, var(--amber), var(--amber-dim));
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 0 1px rgba(255,255,255,0.08) inset, 0 4px 14px -4px var(--amber-glow);
+    flex-shrink:0;
+  }
+  .brand-mark svg{width:16px;height:16px;}
+  h1{
+    margin:0;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:18px;
+    font-weight:700;
+    letter-spacing:-0.02em;
+  }
+  .sub{
+    font-size:12px;
+    color:var(--text-soft);
+    margin-top:2px;
+    margin-left:40px;
+  }
+
+  nav{
+    display:flex;
+    gap:4px;
+    padding:14px 20px 0;
+    max-width:600px;margin:0 auto;
+    position:sticky; top:76px; z-index:9;
+    background:linear-gradient(var(--bg) 60%, transparent);
+  }
+  nav button{
+    flex:1;
+    padding:10px 4px 12px;
+    background:none;
+    border:none;
+    font-family:'Inter',sans-serif;
+    font-size:12.5px;
+    font-weight:600;
+    letter-spacing:0.02em;
+    color:var(--text-faint);
+    border-bottom:2px solid transparent;
+    cursor:pointer;
+    transition:color .15s;
+  }
+  nav button.active{color:var(--text);border-bottom-color:var(--amber);}
+  nav button:not(.active):hover{color:var(--text-soft);}
+
+  main{padding:16px 16px 24px;max-width:600px;margin:0 auto;}
+
+  .card{
+    background:var(--bg-elev);
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius);
+    padding:16px;
+    margin-bottom:12px;
+    box-shadow:var(--shadow-card);
+  }
+  .card-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:14.5px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    letter-spacing:-0.01em;
+  }
+  .muted{color:var(--text-soft);font-size:12.5px;}
+  .faint{color:var(--text-faint);font-size:11.5px;}
+  .row{display:flex;gap:8px;align-items:center;}
+
+  input[type=text],input[type=number],select,textarea{
+    width:100%;
+    padding:11px 12px;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    background:var(--bg-elev-2);
+    color:var(--text);
+    outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  input:focus,select:focus,textarea:focus{
+    border-color:var(--amber-dim);
+    box-shadow:0 0 0 3px var(--amber-glow);
+  }
+  input::placeholder{color:var(--text-faint);}
+  select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238d93a0' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
+
+  label{
+    font-size:11px;color:var(--text-faint);text-transform:uppercase;
+    letter-spacing:0.06em;display:block;margin-bottom:6px;margin-top:14px;
+    font-weight:600;
+  }
+  label:first-of-type{margin-top:0;}
+
+  button.primary{
+    background:linear-gradient(150deg, var(--amber), var(--amber-dim));
+    color:#1a1206;
+    border:none;
+    border-radius:var(--radius-sm);
+    padding:14px 16px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:14.5px;
+    letter-spacing:-0.01em;
+    cursor:pointer;
+    width:100%;
+    transition:transform .1s, box-shadow .15s;
+    box-shadow:0 4px 16px -6px var(--amber-glow);
+  }
+  button.primary:active{transform:scale(0.98);}
+  button.primary:disabled{opacity:0.35;box-shadow:none;cursor:default;}
+  button.primary:disabled:active{transform:none;}
+
+  button.ghost{
+    background:var(--bg-elev-2);
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    padding:8px 13px;
+    font-family:'Inter',sans-serif;
+    font-size:12px;
+    font-weight:600;
+    color:var(--text-soft);
+    cursor:pointer;
+    display:inline-flex;align-items:center;gap:5px;
+    transition:border-color .15s, color .15s;
+  }
+  button.ghost:hover{border-color:var(--amber-dim);color:var(--text);}
+  button.ghost.danger{color:var(--danger);}
+  button.ghost.danger:hover{border-color:var(--danger);}
+  button.ghost.full{width:100%;justify-content:center;}
+
+  .icon{width:14px;height:14px;flex-shrink:0;}
+
+  .supplier-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:14px 4px;
+    border-bottom:1px solid var(--border-soft);
+    cursor:pointer;
+    transition:opacity .15s;
+  }
+  .supplier-item:last-child{border-bottom:none;}
+  .supplier-item:active{opacity:0.7;}
+  .supplier-avatar{
+    width:38px;height:38px;border-radius:10px;
+    background:var(--bg-elev-3);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;
+    color:var(--text-soft);
+    flex-shrink:0;
+  }
+  .supplier-name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14.5px;letter-spacing:-0.01em;}
+
+  .badge{
+    font-size:10px;
+    padding:4px 9px;
+    border-radius:20px;
+    text-transform:uppercase;
+    font-weight:700;
+    letter-spacing:0.04em;
+    display:inline-flex;align-items:center;gap:4px;
+  }
+  .badge.wa{background:rgba(61,220,132,0.14);color:var(--wa);}
+  .badge.mail{background:rgba(91,157,255,0.14);color:var(--mail);}
+  .badge svg{width:10px;height:10px;}
+
+  .arrow{color:var(--text-faint);font-size:16px;}
+
+  .product-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:11px 2px;
+    border-bottom:1px solid var(--border-soft);
+  }
+  .product-row:last-child{border-bottom:none;}
+  .product-name{flex:1;font-size:14px;font-weight:500;}
+  .product-unit{font-size:11px;color:var(--text-faint);}
+
+  .stepper{display:flex;align-items:center;gap:0;background:var(--bg-elev-2);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;flex-shrink:0;}
+  .stepper button{
+    width:30px;height:34px;background:none;border:none;color:var(--text-soft);
+    font-size:15px;cursor:pointer;font-weight:600;
+  }
+  .stepper button:active{background:var(--bg-elev-3);}
+  .stepper input{
+    width:46px;text-align:center;border:none;background:none;padding:0;height:34px;
+    font-weight:600;font-size:13.5px;
+  }
+  .stepper input:focus{box-shadow:none;}
+  .unit-label{width:38px;font-size:11px;color:var(--text-faint);flex-shrink:0;text-align:left;}
+
+  .fab-bar{
+    position:fixed;bottom:0;left:0;right:0;
+    background:linear-gradient(transparent, var(--bg) 30%);
+    padding:24px 16px calc(14px + env(safe-area-inset-bottom));
+    max-width:600px;margin:0 auto;
+  }
+
+  .empty{
+    text-align:center;
+    padding:44px 20px;
+    color:var(--text-soft);
+    font-size:13px;
+    line-height:1.7;
+  }
+  .empty b{color:var(--text);}
+  .empty-icon{width:36px;height:36px;color:var(--text-faint);margin-bottom:12px;}
+
+  .modal-bg{
+    position:fixed;inset:0;background:rgba(8,9,12,0.65);backdrop-filter:blur(2px);
+    display:flex;align-items:flex-end;justify-content:center;z-index:50;
+    animation:fadeIn .18s ease;
+  }
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes slideUp{from{transform:translateY(24px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+  .modal{
+    background:var(--bg-elev);
+    border:1px solid var(--border-soft);
+    border-bottom:none;
+    width:100%;max-width:600px;
+    border-radius:20px 20px 0 0;
+    padding:20px 20px calc(20px + env(safe-area-inset-bottom));
+    max-height:88vh;overflow-y:auto;
+    box-shadow:var(--shadow-modal);
+    position:relative;
+    animation:slideUp .22s cubic-bezier(.2,.8,.2,1);
+  }
+  .modal-handle{width:36px;height:4px;background:var(--border);border-radius:4px;margin:0 auto 16px;}
+  .modal h3{margin:0 0 14px;font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;letter-spacing:-0.01em;}
+  .close-x{
+    position:absolute;top:18px;right:18px;
+    background:var(--bg-elev-2);border:1px solid var(--border);border-radius:8px;
+    width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+    color:var(--text-soft);cursor:pointer;
+  }
+
+  .ticket{
+    background:var(--bg-elev-2);
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    padding:16px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+    line-height:1.7;
+    color:var(--text);
+    margin:12px 0 6px;
+    resize:vertical;
+    min-height:170px;
+  }
+
+  .send-btn{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    width:100%;text-align:center;
+    padding:15px;border-radius:var(--radius-sm);
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;font-size:14.5px;letter-spacing:-0.01em;
+    text-decoration:none;color:#08150e;margin-top:10px;
+    transition:transform .1s;
+  }
+  .send-btn:active{transform:scale(0.98);}
+  .send-btn.wa{background:linear-gradient(150deg, var(--wa), var(--wa-dim));}
+  .send-btn.mail{background:linear-gradient(150deg, var(--mail), var(--mail-dim));color:#0a1220;}
+  .send-btn svg{width:17px;height:17px;}
+
+  .toast{
+    position:fixed;bottom:104px;left:50%;transform:translateX(-50%) translateY(8px);
+    background:var(--bg-elev-3);color:var(--text);padding:11px 18px;border-radius:24px;
+    font-size:13px;font-weight:500;z-index:60;opacity:0;transition:opacity .25s, transform .25s;
+    pointer-events:none;border:1px solid var(--border);
+    box-shadow:0 8px 24px rgba(0,0,0,0.4);
+    display:flex;align-items:center;gap:7px;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast .dot{width:6px;height:6px;border-radius:50%;background:var(--wa);flex-shrink:0;}
+
+  .history-item{padding:13px 4px;border-bottom:1px solid var(--border-soft);}
+  .history-item:last-child{border-bottom:none;}
+  .history-top{display:flex;justify-content:space-between;align-items:center;font-size:13.5px;font-weight:600;font-family:'Space Grotesk',sans-serif;}
+  .history-date{font-size:11.5px;color:var(--text-faint);margin-top:3px;}
+  .repeat-link{
+    font-size:11px;color:var(--amber);font-weight:700;cursor:pointer;
+    display:inline-flex;align-items:center;gap:4px;
+  }
+  .repeat-link svg{width:11px;height:11px;}
+
+  a{color:inherit;}
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--bg-elev-3);border-radius:8px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand-row">
+    <div class="brand-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#1a1206" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18M3 8h14M17 3v18"/></svg>
+    </div>
+    <h1>Supply Line</h1>
+  </div>
+  <div class="sub" id="restaurant-sub">loading…</div>
+</header>
+
+<nav>
+  <button class="tab-btn active" data-tab="orders">ORDER</button>
+  <button class="tab-btn" data-tab="suppliers">SUPPLIERS</button>
+  <button class="tab-btn" data-tab="history">HISTORY</button>
+</nav>
+
+<main id="main"></main>
+
+<div id="toast" class="toast"><span class="dot"></span><span id="toast-text"></span></div>
+
+<script>
+const STORAGE_KEY = 'supply-line-data-v1';
+let DATA = { suppliers: [], products: [], orders: [] };
+let currentTab = 'orders';
+let selectedSupplierId = null;
+let orderDraft = {};
+
+const ICONS = {
+  chevronLeft: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>`,
+  plus: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>`,
+  whatsapp: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.2-.1-.4-.1-.6.1s-.7.9-.9 1.1-.4.2-.6.1c-.3-.1-1.2-.5-2.3-1.5-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.4-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.6-1.5-.8-2-.2-.5-.4-.5-.6-.5h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s1 2.5 1.1 2.7c.1.2 1.9 3 4.7 4.1.7.3 1.2.4 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.6-.7 1.9-1.3.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.6-.3z"/><path d="M12 2a10 10 0 00-8.5 15.2L2 22l4.9-1.5A10 10 0 1012 2zm0 18.2c-1.7 0-3.4-.5-4.8-1.4l-.3-.2-3 .9.9-2.9-.2-.3A8.2 8.2 0 1112 20.2z"/></svg>`,
+  mail: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>`,
+  repeat: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>`,
+  trash: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0l-1 14a2 2 0 01-2 2H7a2 2 0 01-2-2L4 6"/></svg>`,
+  close: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>`,
+  box: `<svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>`,
+  check: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`,
+};
+
+function uid(){ return Math.random().toString(36).slice(2,9); }
+
+async function loadData(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){ DATA = JSON.parse(raw); }
+    else throw new Error('empty');
+  }catch(e){
+    DATA = {
+      suppliers: [
+        {id: uid(), name:'The Butcher', contactMethod:'whatsapp', contactValue:'447700900123'},
+        {id: uid(), name:'Green Fields Produce', contactMethod:'email', contactValue:'orders@greenfields.example'}
+      ],
+      products: [],
+      orders: []
+    };
+    const butcher = DATA.suppliers[0].id, greengrocer = DATA.suppliers[1].id;
+    DATA.products = [
+      {id:uid(), supplierId:butcher, name:'Chicken Breast', unit:'kg'},
+      {id:uid(), supplierId:butcher, name:'Minced Beef', unit:'kg'},
+      {id:uid(), supplierId:butcher, name:'Lamb Chops', unit:'kg'},
+      {id:uid(), supplierId:butcher, name:'Ribeye', unit:'kg'},
+      {id:uid(), supplierId:greengrocer, name:'Tomatoes', unit:'kg'},
+      {id:uid(), supplierId:greengrocer, name:'Potatoes', unit:'kg'},
+      {id:uid(), supplierId:greengrocer, name:'Onions', unit:'kg'},
+      {id:uid(), supplierId:greengrocer, name:'Lettuce', unit:'pc'}
+    ];
+    await saveData();
+  }
+  render();
+}
+
+async function saveData(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
+  }catch(e){
+    console.error('Save error', e);
+    showToast('Could not save — please try again');
+  }
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toast-text').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=>t.classList.remove('show'), 2000);
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentTab = btn.dataset.tab;
+    selectedSupplierId = null;
+    render();
+  });
+});
+
+function render(){
+  const n = DATA.suppliers.length;
+  document.getElementById('restaurant-sub').textContent =
+    n===0 ? 'No suppliers yet' : `${n} supplier${n>1?'s':''} connected`;
+  if(currentTab === 'orders') renderOrders();
+  if(currentTab === 'suppliers') renderSuppliers();
+  if(currentTab === 'history') renderHistory();
+}
+
+function initials(name){
+  return name.trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+}
+
+// ---------- ORDERS TAB ----------
+function renderOrders(){
+  const main = document.getElementById('main');
+  if(selectedSupplierId){ renderOrderBuilder(selectedSupplierId); return; }
+
+  if(DATA.suppliers.length === 0){
+    main.innerHTML = `<div class="empty">${ICONS.box}<div><b>No suppliers yet</b><br>Add your first supplier to start building orders.</div></div>`;
+    return;
+  }
+  let html = `<div class="card-title" style="padding:0 4px 10px;">Who are you ordering from?</div><div class="card">`;
+  DATA.suppliers.forEach(s=>{
+    const lastOrder = DATA.orders.filter(o=>o.supplierId===s.id).sort((a,b)=>b.sentAt-a.sentAt)[0];
+    const lastText = lastOrder ? `Last order ${new Date(lastOrder.sentAt).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}` : 'No orders yet';
+    html += `
+      <div class="supplier-item" onclick="openOrderBuilder('${s.id}')">
+        <div class="row">
+          <div class="supplier-avatar">${initials(s.name)}</div>
+          <div>
+            <div class="supplier-name">${escapeHtml(s.name)}</div>
+            <div class="faint">${lastText}</div>
+          </div>
+        </div>
+        <div class="row">
+          <span class="badge ${s.contactMethod==='whatsapp'?'wa':'mail'}">${s.contactMethod==='whatsapp'?ICONS.whatsapp+'WhatsApp':ICONS.mail+'Email'}</span>
+          <span class="arrow">›</span>
+        </div>
+      </div>`;
+  });
+  html += `</div>`;
+  main.innerHTML = html;
+}
+
+function openOrderBuilder(supplierId){
+  selectedSupplierId = supplierId;
+  orderDraft = {};
+  render();
+}
+
+function renderOrderBuilder(supplierId){
+  const supplier = DATA.suppliers.find(s=>s.id===supplierId);
+  const products = DATA.products.filter(p=>p.supplierId===supplierId);
+  const main = document.getElementById('main');
+  const lastOrder = DATA.orders.filter(o=>o.supplierId===supplierId).sort((a,b)=>b.sentAt-a.sentAt)[0];
+
+  let html = `
+    <div class="card-title" style="padding:0 4px 10px;">
+      <span class="row" style="cursor:pointer;color:var(--text-soft);" onclick="backToList()">${ICONS.chevronLeft}<span style="color:var(--text);font-weight:700;">${escapeHtml(supplier.name)}</span></span>
+      <button class="ghost" onclick="openAddProduct('${supplierId}')">${ICONS.plus}Product</button>
+    </div>`;
+
+  if(lastOrder){
+    html += `<div class="card" style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">
+      <span class="faint">Last sent ${new Date(lastOrder.sentAt).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</span>
+      <span class="repeat-link" onclick="repeatOrder('${lastOrder.id}')">${ICONS.repeat}Repeat last order</span>
+    </div>`;
+  }
+
+  html += `<div class="card">`;
+  if(products.length === 0){
+    html += `<div class="empty">${ICONS.box}<div><b>No products for this supplier yet</b><br><button class="ghost" onclick="openAddProduct('${supplierId}')" style="margin-top:12px;">${ICONS.plus}Add first product</button></div></div>`;
+  } else {
+    products.forEach(p=>{
+      const val = orderDraft[p.id] || '';
+      html += `
+        <div class="product-row">
+          <div class="product-name">${escapeHtml(p.name)}</div>
+          <div class="unit-label">${escapeHtml(p.unit||'')}</div>
+          <div class="stepper">
+            <button type="button" onclick="stepQty('${p.id}', -1)">–</button>
+            <input type="number" inputmode="decimal" id="qty-${p.id}" value="${val}" placeholder="0" oninput="setQty('${p.id}', this.value)">
+            <button type="button" onclick="stepQty('${p.id}', 1)">+</button>
+          </div>
+        </div>`;
+    });
+  }
+  html += `</div>`;
+
+  const itemCount = Object.values(orderDraft).filter(v=>v && parseFloat(v)>0).length;
+  html += `
+    <div class="fab-bar">
+      <button class="primary" id="review-btn" ${itemCount===0?'disabled':''} onclick="openReview('${supplierId}')">
+        Review order ${itemCount>0? '· '+itemCount+' item'+(itemCount>1?'s':''):''}
+      </button>
+    </div>`;
+
+  main.innerHTML = html;
+}
+
+function backToList(){ selectedSupplierId = null; render(); }
+
+function setQty(productId, val){
+  orderDraft[productId] = val;
+  updateReviewButton();
+}
+
+function stepQty(productId, delta){
+  const current = parseFloat(orderDraft[productId] || 0);
+  let next = current + delta;
+  if(next < 0) next = 0;
+  orderDraft[productId] = next === 0 ? '' : String(next);
+  const input = document.getElementById('qty-'+productId);
+  if(input) input.value = orderDraft[productId];
+  updateReviewButton();
+}
+
+function updateReviewButton(){
+  const btn = document.getElementById('review-btn');
+  if(!btn) return;
+  const itemCount = Object.values(orderDraft).filter(v=>v && parseFloat(v)>0).length;
+  btn.textContent = `Review order ${itemCount>0? '· '+itemCount+' item'+(itemCount>1?'s':''):''}`.trim();
+  btn.disabled = itemCount===0;
+}
+
+function repeatOrder(orderId){
+  const order = DATA.orders.find(o=>o.id===orderId);
+  if(!order) return;
+  orderDraft = {};
+  order.items.forEach(it=>{ orderDraft[it.productId] = String(it.qty); });
+  render();
+  showToast('Last order filled in — adjust as needed');
+}
+
+// ---------- REVIEW / SEND ----------
+function buildMessageText(supplier, items){
+  const date = new Date().toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+  let lines = [`ORDER — ${date}`, ''];
+  items.forEach(it=>{ lines.push(`- ${it.name}: ${it.qty} ${it.unit||''}`.trim()); });
+  return lines.join('\n');
+}
+
+function openReview(supplierId){
+  const supplier = DATA.suppliers.find(s=>s.id===supplierId);
+  const products = DATA.products.filter(p=>p.supplierId===supplierId);
+  const items = products
+    .filter(p=> orderDraft[p.id] && parseFloat(orderDraft[p.id])>0)
+    .map(p=>({productId:p.id, name:p.name, unit:p.unit, qty:orderDraft[p.id]}));
+  if(items.length===0) return;
+
+  const text = buildMessageText(supplier, items);
+  const itemsJson = JSON.stringify(items).replace(/"/g,'&quot;');
+  const modalBg = document.createElement('div');
+  modalBg.className = 'modal-bg';
+  modalBg.onclick = (e)=>{ if(e.target===modalBg) modalBg.remove(); };
+  modalBg.innerHTML = `
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <button class="close-x" onclick="this.closest('.modal-bg').remove()">${ICONS.close}</button>
+      <h3>Ready to send</h3>
+      <label>Message to ${escapeHtml(supplier.name)}</label>
+      <textarea id="review-text" class="ticket">${text}</textarea>
+      <div class="faint">You can edit this text before sending.</div>
+      ${supplier.contactMethod==='whatsapp' ? `
+        <a href="#" class="send-btn wa" onclick="doSend('${supplierId}', ${itemsJson}); return false;">${ICONS.whatsapp}Send via WhatsApp</a>
+      ` : `
+        <a href="#" class="send-btn mail" onclick="doSend('${supplierId}', ${itemsJson}); return false;">${ICONS.mail}Send via Email</a>
+      `}
+    </div>
+  `;
+  document.body.appendChild(modalBg);
+}
+
+async function doSend(supplierId, items){
+  const supplier = DATA.suppliers.find(s=>s.id===supplierId);
+  const textArea = document.getElementById('review-text');
+  const finalText = textArea ? textArea.value : buildMessageText(supplier, items);
+
+  const order = { id: uid(), supplierId, items, sentAt: Date.now(), channel: supplier.contactMethod };
+  DATA.orders.push(order);
+  await saveData();
+
+  if(supplier.contactMethod === 'whatsapp'){
+    const phone = (supplier.contactValue||'').replace(/[^\d]/g,'');
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(finalText)}`, '_blank');
+  } else {
+    const subject = encodeURIComponent(`Order — ${supplier.name} — ${new Date().toLocaleDateString('en-GB')}`);
+    window.location.href = `mailto:${supplier.contactValue}?subject=${subject}&body=${encodeURIComponent(finalText)}`;
+  }
+
+  document.querySelectorAll('.modal-bg').forEach(m=>m.remove());
+  orderDraft = {};
+  selectedSupplierId = null;
+  currentTab = 'orders';
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab==='orders'));
+  render();
+  showToast('Order saved and ready to send');
+}
+
+// ---------- SUPPLIERS TAB ----------
+function renderSuppliers(){
+  const main = document.getElementById('main');
+  let html = `<div class="card-title" style="padding:0 4px 10px;">Suppliers<button class="ghost" onclick="openAddSupplier()">${ICONS.plus}Add supplier</button></div>`;
+  html += `<div class="row" style="padding:0 4px 12px;gap:8px;">
+    <button class="ghost" style="flex:1;justify-content:center;" onclick="exportData()">⬇ Backup data</button>
+    <button class="ghost" style="flex:1;justify-content:center;" onclick="document.getElementById('import-file').click()">⬆ Restore backup</button>
+    <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importData(event)">
+  </div>`;
+
+  if(DATA.suppliers.length===0){
+    html += `<div class="card"><div class="empty">${ICONS.box}<div><b>No suppliers yet</b><br><button class="ghost" onclick="openAddSupplier()" style="margin-top:12px;">${ICONS.plus}Add your first supplier</button></div></div></div>`;
+  } else {
+    html += `<div class="card">`;
+    DATA.suppliers.forEach(s=>{
+      const productCount = DATA.products.filter(p=>p.supplierId===s.id).length;
+      html += `
+        <div class="supplier-item">
+          <div class="row" onclick="openEditSupplier('${s.id}')" style="flex:1;cursor:pointer;">
+            <div class="supplier-avatar">${initials(s.name)}</div>
+            <div>
+              <div class="supplier-name">${escapeHtml(s.name)}</div>
+              <div class="faint">${productCount} product${productCount!==1?'s':''} · ${escapeHtml(s.contactValue)}</div>
+            </div>
+          </div>
+          <span class="badge ${s.contactMethod==='whatsapp'?'wa':'mail'}">${s.contactMethod==='whatsapp'?ICONS.whatsapp+'WhatsApp':ICONS.mail+'Email'}</span>
+        </div>`;
+    });
+    html += `</div>`;
+  }
+  main.innerHTML = html;
+}
+
+function openAddSupplier(){ showSupplierModal(null); }
+function openEditSupplier(id){ showSupplierModal(DATA.suppliers.find(s=>s.id===id)); }
+
+function showSupplierModal(supplier){
+  const isEdit = !!supplier;
+  const modalBg = document.createElement('div');
+  modalBg.className = 'modal-bg';
+  modalBg.onclick = (e)=>{ if(e.target===modalBg) modalBg.remove(); };
+  modalBg.innerHTML = `
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <button class="close-x" onclick="this.closest('.modal-bg').remove()">${ICONS.close}</button>
+      <h3>${isEdit ? 'Edit supplier' : 'New supplier'}</h3>
+      <label>Supplier name</label>
+      <input type="text" id="sup-name" value="${isEdit ? escapeHtml(supplier.name) : ''}" placeholder="e.g. The Butcher">
+      <label>Contact method</label>
+      <select id="sup-method">
+        <option value="whatsapp" ${isEdit && supplier.contactMethod==='whatsapp'?'selected':''}>WhatsApp</option>
+        <option value="email" ${isEdit && supplier.contactMethod==='email'?'selected':''}>Email</option>
+      </select>
+      <label id="sup-value-label">Phone number (with country code)</label>
+      <input type="text" id="sup-value" value="${isEdit ? escapeHtml(supplier.contactValue) : ''}" placeholder="447700900123">
+      <button class="primary" style="margin-top:18px;" onclick="saveSupplier(${isEdit ? `'${supplier.id}'` : 'null'})">${ICONS.check}Save supplier</button>
+      ${isEdit ? `<button class="ghost danger full" style="margin-top:10px;" onclick="deleteSupplier('${supplier.id}')">${ICONS.trash}Delete supplier</button>` : ''}
+    </div>
+  `;
+  document.body.appendChild(modalBg);
+
+  const methodSelect = modalBg.querySelector('#sup-method');
+  const valueLabel = modalBg.querySelector('#sup-value-label');
+  const valueInput = modalBg.querySelector('#sup-value');
+  function updateLabel(){
+    if(methodSelect.value === 'whatsapp'){
+      valueLabel.textContent = 'Phone number (with country code)';
+      valueInput.placeholder = '447700900123';
+    } else {
+      valueLabel.textContent = 'Email address';
+      valueInput.placeholder = 'orders@supplier.com';
+    }
+  }
+  methodSelect.addEventListener('change', updateLabel);
+}
+
+async function saveSupplier(id){
+  const name = document.getElementById('sup-name').value.trim();
+  const method = document.getElementById('sup-method').value;
+  const value = document.getElementById('sup-value').value.trim();
+  if(!name || !value){ showToast('Please fill in all fields'); return; }
+
+  if(id){
+    const s = DATA.suppliers.find(x=>x.id===id);
+    s.name = name; s.contactMethod = method; s.contactValue = value;
+  } else {
+    DATA.suppliers.push({id: uid(), name, contactMethod: method, contactValue: value});
+  }
+  await saveData();
+  document.querySelectorAll('.modal-bg').forEach(m=>m.remove());
+  render();
+  showToast('Supplier saved');
+}
+
+async function deleteSupplier(id){
+  if(!confirm('Delete this supplier and its products? Order history will be kept.')) return;
+  DATA.suppliers = DATA.suppliers.filter(s=>s.id!==id);
+  DATA.products = DATA.products.filter(p=>p.supplierId!==id);
+  await saveData();
+  document.querySelectorAll('.modal-bg').forEach(m=>m.remove());
+  render();
+  showToast('Supplier deleted');
+}
+
+function openAddProduct(supplierId){
+  const modalBg = document.createElement('div');
+  modalBg.className = 'modal-bg';
+  modalBg.onclick = (e)=>{ if(e.target===modalBg) modalBg.remove(); };
+  modalBg.innerHTML = `
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <button class="close-x" onclick="this.closest('.modal-bg').remove()">${ICONS.close}</button>
+      <h3>Add product</h3>
+      <label>Product name</label>
+      <input type="text" id="prod-name" placeholder="e.g. Tomatoes">
+      <label>Unit</label>
+      <select id="prod-unit">
+        <option value="kg">kg</option>
+        <option value="pc">pc</option>
+        <option value="box">box</option>
+        <option value="case">case</option>
+        <option value="litre">litre</option>
+        <option value="pack">pack</option>
+      </select>
+      <button class="primary" style="margin-top:18px;" onclick="saveProduct('${supplierId}')">${ICONS.plus}Add product</button>
+    </div>
+  `;
+  document.body.appendChild(modalBg);
+  const nameInput = document.getElementById('prod-name');
+  nameInput.focus();
+  nameInput.addEventListener('keydown', e=>{ if(e.key==='Enter') saveProduct(supplierId); });
+}
+
+async function saveProduct(supplierId){
+  const name = document.getElementById('prod-name').value.trim();
+  const unit = document.getElementById('prod-unit').value;
+  if(!name){ showToast('Product name is required'); return; }
+  DATA.products.push({id: uid(), supplierId, name, unit});
+  await saveData();
+  document.querySelectorAll('.modal-bg').forEach(m=>m.remove());
+  render();
+  showToast('Product added');
+}
+
+// ---------- HISTORY TAB ----------
+function renderHistory(){
+  const main = document.getElementById('main');
+  const orders = [...DATA.orders].sort((a,b)=>b.sentAt-a.sentAt);
+  if(orders.length===0){
+    main.innerHTML = `<div class="card"><div class="empty">${ICONS.box}<div><b>No orders sent yet</b><br>Your sent orders will show up here.</div></div></div>`;
+    return;
+  }
+  let html = `<div class="card-title" style="padding:0 4px 10px;">Order history</div><div class="card">`;
+  orders.forEach(o=>{
+    const supplier = DATA.suppliers.find(s=>s.id===o.supplierId);
+    const itemsText = o.items.map(it=>`${it.name} ${it.qty}${it.unit||''}`).join(', ');
+    html += `
+      <div class="history-item">
+        <div class="history-top">
+          <span>${supplier ? escapeHtml(supplier.name) : 'Deleted supplier'}</span>
+          <span class="repeat-link" onclick="quickRepeat('${o.id}')">${ICONS.repeat}Repeat</span>
+        </div>
+        <div class="history-date">${new Date(o.sentAt).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})} · ${o.items.length} item${o.items.length!==1?'s':''}</div>
+        <div class="muted" style="margin-top:5px;">${escapeHtml(itemsText)}</div>
+      </div>`;
+  });
+  html += `</div>`;
+  main.innerHTML = html;
+}
+
+function quickRepeat(orderId){
+  const order = DATA.orders.find(o=>o.id===orderId);
+  if(!order) return;
+  selectedSupplierId = order.supplierId;
+  orderDraft = {};
+  order.items.forEach(it=>{ orderDraft[it.productId] = String(it.qty); });
+  currentTab = 'orders';
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab==='orders'));
+  render();
+  showToast('Order filled in — review and send');
+}
+
+function exportData(){
+  const blob = new Blob([JSON.stringify(DATA, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const date = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `supply-line-backup-${date}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  showToast('Backup file downloaded');
+}
+
+async function importData(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  try{
+    const text = await file.text();
+    const parsed = JSON.parse(text);
+    if(!parsed.suppliers || !parsed.products || !parsed.orders){
+      showToast('This file doesn\'t look like a valid backup');
+      return;
+    }
+    if(!confirm('This will replace all current data with the backup. Continue?')) { event.target.value=''; return; }
+    DATA = parsed;
+    await saveData();
+    render();
+    showToast('Backup restored');
+  }catch(e){
+    console.error(e);
+    showToast('Could not read that file');
+  }
+  event.target.value = '';
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+loadData();
+</script>
+</body>
+</html>
