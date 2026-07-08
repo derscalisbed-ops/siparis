@@ -529,7 +529,7 @@ function renderOrders(){
           </div>
         </div>
         <div class="row">
-          <span class="badge ${s.contactMethod==='whatsapp'?'wa':'mail'}">${s.contactMethod==='whatsapp'?ICONS.whatsapp+'WhatsApp':ICONS.mail+'Email'}</span>
+          <span class="badge ${s.contactMethod==='whatsapp'?'wa':'mail'}">${s.contactMethod==='whatsapp'?ICONS.whatsapp+(s.whatsappTarget==='group'?'WhatsApp Group':'WhatsApp'):ICONS.mail+'Email'}</span>
           <span class="arrow">›</span>
         </div>
       </div>`;
@@ -723,7 +723,7 @@ function openReview(supplierId){
       <textarea id="review-text" class="ticket">${text}</textarea>
       <div class="faint">You can edit this text before sending.</div>
       ${supplier.contactMethod==='whatsapp' ? `
-        <a href="#" class="send-btn wa" onclick="doSend('${supplierId}', ${itemsJson}); return false;">${ICONS.whatsapp}Send via WhatsApp</a>
+        <a href="#" class="send-btn wa" onclick="doSend('${supplierId}', ${itemsJson}); return false;">${ICONS.whatsapp}${supplier.whatsappTarget==='group' ? 'Share to WhatsApp Group' : 'Send via WhatsApp'}</a>
       ` : `
         <a href="#" class="send-btn mail" onclick="doSend('${supplierId}', ${itemsJson}); return false;">${ICONS.mail}Send via Email</a>
       `}
@@ -742,8 +742,12 @@ async function doSend(supplierId, items){
   await saveData();
 
   if(supplier.contactMethod === 'whatsapp'){
-    const phone = (supplier.contactValue||'').replace(/[^\d]/g,'');
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(finalText)}`, '_blank');
+    if(supplier.whatsappTarget === 'group'){
+      await shareOrderToWhatsAppGroup(finalText);
+    } else {
+      const phone = (supplier.contactValue||'').replace(/[^\d]/g,'');
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(finalText)}`, '_blank');
+    }
   } else {
     const subject = encodeURIComponent(`Order — ${supplier.name} — ${new Date().toLocaleDateString('en-GB')}`);
     window.location.href = `mailto:${supplier.contactValue}?subject=${subject}&body=${encodeURIComponent(finalText)}`;
@@ -758,6 +762,29 @@ async function doSend(supplierId, items){
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab==='orders'));
   render();
   showToast('Order saved and ready to send');
+}
+
+// ---------- WHATSAPP GROUP SHARING (native Share sheet) ----------
+async function shareOrderToWhatsAppGroup(text){
+  if(navigator.share){
+    try{
+      await navigator.share({ text });
+    }catch(e){
+      if(e && e.name !== 'AbortError'){
+        console.error(e);
+        showToast('Could not open the share sheet — copy the message and paste it in WhatsApp');
+      }
+    }
+  } else if(navigator.clipboard && navigator.clipboard.writeText){
+    try{
+      await navigator.clipboard.writeText(text);
+      showToast('Sharing isn\'t supported here — message copied, paste it in your WhatsApp group');
+    }catch(e){
+      showToast('Sharing isn\'t supported on this device — copy the message manually');
+    }
+  } else {
+    showToast('Sharing isn\'t supported on this device — copy the message manually');
+  }
 }
 
 // ---------- SUPPLIERS TAB ----------
@@ -785,7 +812,7 @@ function renderSuppliers(){
               <div class="faint">${productCount} product${productCount!==1?'s':''} · ${escapeHtml(s.contactValue)}</div>
             </div>
           </div>
-          <span class="badge ${s.contactMethod==='whatsapp'?'wa':'mail'}">${s.contactMethod==='whatsapp'?ICONS.whatsapp+'WhatsApp':ICONS.mail+'Email'}</span>
+          <span class="badge ${s.contactMethod==='whatsapp'?'wa':'mail'}">${s.contactMethod==='whatsapp'?ICONS.whatsapp+(s.whatsappTarget==='group'?'WhatsApp Group':'WhatsApp'):ICONS.mail+'Email'}</span>
         </div>`;
     });
     html += `</div>`;
@@ -798,6 +825,7 @@ function openEditSupplier(id){ showSupplierModal(DATA.suppliers.find(s=>s.id===i
 
 function showSupplierModal(supplier){
   const isEdit = !!supplier;
+  const waTarget = isEdit ? (supplier.whatsappTarget === 'group' ? 'group' : 'number') : 'number';
   const modalBg = document.createElement('div');
   modalBg.className = 'modal-bg';
   modalBg.onclick = (e)=>{ if(e.target===modalBg) modalBg.remove(); };
@@ -813,8 +841,15 @@ function showSupplierModal(supplier){
         <option value="whatsapp" ${isEdit && supplier.contactMethod==='whatsapp'?'selected':''}>WhatsApp</option>
         <option value="email" ${isEdit && supplier.contactMethod==='email'?'selected':''}>Email</option>
       </select>
+      <div id="sup-wa-target-wrap">
+        <label>WhatsApp type</label>
+        <select id="sup-wa-target">
+          <option value="number" ${waTarget==='number'?'selected':''}>Number (opens direct chat)</option>
+          <option value="group" ${waTarget==='group'?'selected':''}>Group (share via WhatsApp)</option>
+        </select>
+      </div>
       <label id="sup-value-label">Phone number (with country code)</label>
-      <input type="text" id="sup-value" value="${isEdit ? escapeHtml(supplier.contactValue) : ''}" placeholder="447700900123">
+      <input type="text" id="sup-value" value="${isEdit ? escapeHtml(supplier.contactValue||'') : ''}" placeholder="447700900123">
       <button class="primary" style="margin-top:18px;" onclick="saveSupplier(${isEdit ? `'${supplier.id}'` : 'null'})">${ICONS.check}Save supplier</button>
       ${isEdit ? `<button class="ghost danger full" style="margin-top:10px;" onclick="confirmDeleteSupplier('${supplier.id}')">${ICONS.trash}Delete supplier</button>` : ''}
     </div>
@@ -822,31 +857,43 @@ function showSupplierModal(supplier){
   document.body.appendChild(modalBg);
 
   const methodSelect = modalBg.querySelector('#sup-method');
+  const waTargetSelect = modalBg.querySelector('#sup-wa-target');
+  const waTargetWrap = modalBg.querySelector('#sup-wa-target-wrap');
   const valueLabel = modalBg.querySelector('#sup-value-label');
   const valueInput = modalBg.querySelector('#sup-value');
   function updateLabel(){
     if(methodSelect.value === 'whatsapp'){
-      valueLabel.textContent = 'Phone number (with country code)';
-      valueInput.placeholder = '447700900123';
+      waTargetWrap.style.display = '';
+      if(waTargetSelect.value === 'group'){
+        valueLabel.textContent = 'Group name (for your reference)';
+        valueInput.placeholder = 'Kitchen Suppliers Group';
+      } else {
+        valueLabel.textContent = 'Phone number (with country code)';
+        valueInput.placeholder = '447700900123';
+      }
     } else {
+      waTargetWrap.style.display = 'none';
       valueLabel.textContent = 'Email address';
       valueInput.placeholder = 'orders@supplier.com';
     }
   }
   methodSelect.addEventListener('change', updateLabel);
+  waTargetSelect.addEventListener('change', updateLabel);
+  updateLabel();
 }
 
 async function saveSupplier(id){
   const name = document.getElementById('sup-name').value.trim();
   const method = document.getElementById('sup-method').value;
+  const whatsappTarget = document.getElementById('sup-wa-target').value;
   const value = document.getElementById('sup-value').value.trim();
   if(!name || !value){ showToast('Please fill in all fields'); return; }
 
   if(id){
     const s = DATA.suppliers.find(x=>x.id===id);
-    s.name = name; s.contactMethod = method; s.contactValue = value;
+    s.name = name; s.contactMethod = method; s.contactValue = value; s.whatsappTarget = whatsappTarget;
   } else {
-    DATA.suppliers.push({id: uid(), name, contactMethod: method, contactValue: value});
+    DATA.suppliers.push({id: uid(), name, contactMethod: method, contactValue: value, whatsappTarget});
   }
   await saveData();
   document.querySelectorAll('.modal-bg').forEach(m=>m.remove());
